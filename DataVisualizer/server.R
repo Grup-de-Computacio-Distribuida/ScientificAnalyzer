@@ -6,7 +6,7 @@ server <- function(input, output) {
     end_year <- as.numeric(input$years[2])
     # Create an empty dataframe to store the number of papers
     n_documents_by_year <-
-      data.frame(matrix(ncol = 5, nrow = end_year - start_year + 1))
+      data.frame(matrix(ncol = 6, nrow = end_year - start_year + 1))
     colnames(n_documents_by_year) <- c("year", editorials, "ALL")
     n_documents_by_year$year <- start_year:end_year
     aux <-

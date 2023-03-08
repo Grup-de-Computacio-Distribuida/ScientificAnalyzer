@@ -1,5 +1,7 @@
 import urllib
 
+from DataCollector.InvalidData import InvalidData
+
 
 class Miner:
     csv_format = "\"{year}\",\"{title}\",\"{citations}\",\"{authors}\",\"{editorial}\""
@@ -56,8 +58,11 @@ class Miner:
     def page_analysis(self, year, current):  # Analise page documents and return the number of analyzed documents
         analyzed = 0
         for paper in self._get_list_current_list_of_papers(year, current):
-            title, citations, authors = self.reg_analysis(paper)
-            self.save_reg(year, title, citations, authors)
+            try:
+                title, citations, authors = self.reg_analysis(paper)
+                self.save_reg(year, title, citations, authors)
+            except InvalidData:
+                pass
             analyzed += 1
         return analyzed
 

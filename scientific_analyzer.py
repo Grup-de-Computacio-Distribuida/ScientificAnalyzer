@@ -104,7 +104,7 @@ elif args.load:
 
     df_list = []
     for file in all_files:
-        df = pd.read_csv(os.path.join(tmp_data_path, file))
+        df = pd.read_csv(os.path.join(tmp_data_path, file), dtype={'year': int, 'title': str, 'citations': int, 'authors': str, 'editorial': str})
         df_list.append(df)
     merged_df = pd.concat(df_list)
     merged_df.to_csv(os.path.join(data_path, "all.csv"), index=False)
