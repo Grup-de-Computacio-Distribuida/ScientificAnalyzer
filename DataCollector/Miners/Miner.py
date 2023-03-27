@@ -46,8 +46,8 @@ class Miner:
     def year_analysis(self, year):
         year_analyzed = 0
         current = 0
-        limit = self._get_limit(year)
         print("Start analysis year: " + str(year))
+        limit = self._get_limit(year)
         while current < limit:
             year_analyzed += self.page_analysis(year, current)
             print("Year " + str(year) + ": Progress: " + str(round((current / limit) * 100, 2)) + "%")
