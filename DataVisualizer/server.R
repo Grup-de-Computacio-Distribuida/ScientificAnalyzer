@@ -95,15 +95,20 @@ server <- function(input, output) {
     
     percentage_evolution <-
       round((evolution / df[-length(df)]) * 100, 2)
-    df_label <-
-      paste(df[-length(df)], "(", percentage_evolution, "%)")
+
     
+    greater_than_9999 <- df[-length(df)] > 9999
+    df_label <- ifelse(greater_than_9999,
+                       paste(format(df[-length(df)], big.mark = ","), " (", percentage_evolution, "%)", sep = ""),
+                       paste(df[-length(df)], " (", percentage_evolution, "%)", sep = ""))
+    
+
     n_documents_by_year_evolution <-
       n_documents_by_year[2:(as.numeric(input$years[2]) - as.numeric(input$years[1]) +
                                1), ]
     n_documents_by_year_evolution$labels <- df_label
     
-    ggplot(data = n_documents_by_year_evolution, aes(x = year, y = ALL, group = 1)) +
+    generated_documents_plot = ggplot(data = n_documents_by_year_evolution, aes(x = year, y = ALL, group = 1)) +
       geom_line(aes(x = year, y = ALL), color = "black") +
       geom_point(aes(x = year, y = ALL), color = "black") +
       geom_text(
@@ -116,8 +121,12 @@ server <- function(input, output) {
       ylab("Generated Documents") +
       scale_x_continuous(breaks = seq(as.numeric(input$years[1]) + 1, as.numeric(input$years[2]), 1),
                          expand = c(0.1, 0.9)) +
-      #scale_y_continuous(breaks = seq(0, max(n_documents_by_year_evolution$ALL), as.integer(max(n_documents_by_year_evolution$ALL)/4))) +
+      scale_y_continuous(labels = function(x) ifelse(x > 9999, format(x, big.mark = ","), x)) +
       theme(legend.title = element_blank())
+    
+    ggsave("generated_documents.png", generated_documents_plot, dpi=300) # Decomment to save on a folder a big plot 
+    generated_documents_plot
+    
   })
   
   
@@ -178,7 +187,7 @@ server <- function(input, output) {
     graf <- data.frame(Year = Year,
                        Top10 = Top10,
                        Word = Word)
-    ggplot(
+    top10_plot = ggplot(
       data = graf,
       aes(x = Year, y = Top10, label = Word),
       ylim = c(10, 1),
@@ -195,7 +204,11 @@ server <- function(input, output) {
         breaks = c(10, 9, 8, 7, 6, 5, 4, 3, 2, 1)
       ) +
       scale_x_continuous(name = "Year", breaks = c(start_year:end_year)) +
-      guides(color = FALSE, size = FALSE) + guides(color = FALSE, size = FALSE)
+      guides(color = FALSE, size = FALSE) + guides(color = FALSE, size = FALSE) 
+    
+    #ggsave("top10_graph.png", top10_plot, dpi=300) #Decomment to save on a folder a big plot 
+    top10_plot 
+    
     
   })
   output$top_3_by_year <- renderTable(striped = TRUE,spacing = 'xs',width = '100%',{
