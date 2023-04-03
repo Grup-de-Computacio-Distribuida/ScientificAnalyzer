@@ -25,7 +25,11 @@ class ACMMiner(Miner):
 
     def _find_acm_pages(self, parse):
         if parse:
-            records = parse.find("span", {"class": "result__count"}).find(text=True, recursive=False).split()[0]
+            parse = parse.find("span", {"class": "result__count"})
+            if parse:
+                records = parse.find(text=True, recursive=False).split()[0]
+            else:
+                return 0
             records = int(records.replace(",",""))
             return int(records/self.reg_for_page) + 1 if records != 0 else 0
         return 0
