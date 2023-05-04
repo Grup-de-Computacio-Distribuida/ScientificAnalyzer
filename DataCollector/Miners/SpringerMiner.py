@@ -75,7 +75,7 @@ class SpringerMiner(Miner):
     def _get_content_citations(self, paper):
         raw_title = paper.find("a", {"class": "title"})
         href = raw_title['href']
-        citations = self._get_springer_citations(href)
+        return self._get_springer_citations(href)
 
     def _get_content_authors(self, paper):
         raw_authors = paper.find("span", {"class": "authors"})

@@ -61,10 +61,11 @@ if args.collect:
     with open(tmp_data_path + "/time.csv", "w") as f:
         f.write(datetime.datetime.now().strftime("%Y-%m-%d"))
 
-
-    for MinerClass in miners_list:
-        miner = MinerClass(term, start_year, end_year, tmp_data_path)
-        miner.run()
+    while start_year <= end_year:
+        for MinerClass in miners_list:
+            miner = MinerClass(term, start_year, start_year, tmp_data_path)
+            miner.run()
+        start_year += 1
 
     print()
     print()

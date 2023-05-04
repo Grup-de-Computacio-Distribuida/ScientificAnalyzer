@@ -1,3 +1,5 @@
+from time import sleep
+
 import bs4
 import requests
 
@@ -48,6 +50,7 @@ class ACMMiner(Miner):
         url = self.acm_web_url.format(page=current, term=self.term, year=year)
         r = requests.get(url, headers=self._get_request_header())
         parse = bs4.BeautifulSoup(r.text, features="html.parser")
+        sleep(5) #Sleep 5s to avoid ip block
         result = parse.find("ul", {"class": "items-results"})
         if result:
             return result.find_all("li", recursive=False)

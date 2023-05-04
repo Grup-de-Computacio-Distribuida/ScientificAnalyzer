@@ -11,6 +11,7 @@ class IEEEMiner(Miner):
         self.ieee_api_url = self.ieee_base_url + "/rest/search"
         self.token = None
         self.token = self._get_token()
+        self._term_no_filter = term
 
     def _get_editorial(self):
         return "IEEE"
@@ -35,7 +36,7 @@ class IEEEMiner(Miner):
         return {
             "highlight": True,
             "matchPubs": True,
-            "queryText": "blockchain",
+            "queryText": self._term_no_filter,
             "returnFacets": ["ALL"],
             "returnType": "SEARCH",
             "pageNumber": str(page),
@@ -54,9 +55,13 @@ class IEEEMiner(Miner):
     def _get_list_current_list_of_papers(self, year, current):
         response = requests.post(self.ieee_api_url, json=self._get_ieee_post_data(current, year),
                                  headers=self._get_request_header())
-        o_json = json.loads(response.text)
-        if 'records' in o_json:
-            return o_json['records']
+        try:
+            o_json = json.loads(response.text)
+            if 'records' in o_json:
+                return o_json['records']
+        except Exception as e:
+            print("Error detected on response: " + str(response))
+            print(str(e))
         return []
 
     def _get_content_title(self, paper):
