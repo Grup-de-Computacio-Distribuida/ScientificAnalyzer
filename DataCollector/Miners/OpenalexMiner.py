@@ -12,7 +12,7 @@ class OpenalexMiner(Miner):
 
         self.reg_for_page = 25
         self.alex_base_url = "https://api.openalex.org/works"
-        self.alexa_base_plus_filters = self.alex_base_url + "?filter=default.search:{term},publication_year:{year},primary_location.is_published:true,type:article"
+        self.alexa_base_plus_filters = self.alex_base_url + "?filter=default.search:{term},publication_year:{year},primary_location.is_published:true,type:article,language:en"
         self.alex_web_url = self.alexa_base_plus_filters + "&select=publication_year,display_name,authorships,primary_location,cited_by_count" #&page={}
     
     def _get_editorial(self, paper=None):
