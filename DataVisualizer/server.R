@@ -4,25 +4,10 @@ server <- function(input, output) {
   get_n_documents_by_year <- reactive({
     start_year <- as.numeric(input$years[1])
     end_year <- as.numeric(input$years[2])
-    # Create an empty dataframe to store the number of papers
-    n_documents_by_year <-
-      data.frame(matrix(ncol = 5, nrow = end_year - start_year + 1))
-    colnames(n_documents_by_year) <- c("year", editorials, "ALL")
-    n_documents_by_year$year <- start_year:end_year
-    aux <-
-      rbind(n_documents_by_year, c("ALL", rep(0, length(editorials) + 1)))
-    n_documents_by_year <- aux
-    for (i in start_year:end_year) {
-      aux_df = subset(papers_all, year == i)
-      n_documents_by_year[n_documents_by_year$year == i, "ALL"] = nrow(aux_df)
-      n_documents_by_year[n_documents_by_year$year == "ALL", "ALL"] = as.numeric(n_documents_by_year[n_documents_by_year$year == "ALL", "ALL"]) + as.numeric(n_documents_by_year[n_documents_by_year$year == i, "ALL"])
-      for (f in editorials) {
-        n_documents_by_year[n_documents_by_year$year == i, f]  = nrow(subset(aux_df, editorial == f))
-        n_documents_by_year[n_documents_by_year$year == "ALL", f] = as.numeric(n_documents_by_year[n_documents_by_year$year == "ALL", f]) + as.numeric(n_documents_by_year[n_documents_by_year$year == i, f])
-      }
-    }
-    n_documents_by_year
-    
+    datos <- mutate(papers_all, ALL = 1)
+    tabla_resumen <- table(datos$year) %>% as.data.frame()
+    tabla_resumen$Freq <- as.integer(tabla_resumen$Freq)
+    return(tabla_resumen)
   })
   
   get_top10_data <- reactive({
@@ -41,91 +26,31 @@ server <- function(input, output) {
   })
   
   
-  
-  
   output$resumeTable <- renderTable(striped = TRUE, align = 'c', spacing = 'xs',width = '100%',{
     n_documents_by_year <- get_n_documents_by_year()
-    transposed_n_documents_by_year <- t(n_documents_by_year)
-    colnames(transposed_n_documents_by_year) <-
-      transposed_n_documents_by_year[1, ]
-    transposed_n_documents_by_year <-
-      transposed_n_documents_by_year[-1, ]
-    transposed_n_documents_by_year <-
-      cbind(Platform = c(editorials, "ALL"),
-            transposed_n_documents_by_year)
-    transposed_n_documents_by_year
-    
+    n_documents_by_year <- bind_rows(n_documents_by_year, data.frame(Var1 = "TOTAL", Freq = sum(n_documents_by_year$Freq)))
+    n_documents_by_year <- spread(n_documents_by_year, key = Var1, value = Freq)
+    n_documents_by_year
+
   })
   
-  output$totalByPlataform <- renderPlot({
-    n_documents_by_year <- head(get_n_documents_by_year(), -1)
-    n_documents_by_year[] <-
-      lapply(n_documents_by_year, as.numeric)
-    # Define the plot
-    plot  <- ggplot(data = n_documents_by_year)
-    # Add lines and points for each editorial
-    for (f in editorials) {
-      plot = plot + geom_line(aes_string(
-        x = "year",
-        y = f,
-        color = shQuote(f)
-      ), show.legend = TRUE)
-      plot <-
-        plot + geom_point(aes_string(
-          x = "year",
-          y = f,
-          color = shQuote(f)
-        ))
-    }
-    plot  <- plot + xlab("Year")
-    plot  <- plot + ylab("Generated Documents")
-    # Plot the chart
-    plot
-    
-  })
-  
-  
+
+
   
   output$totalByYear <- renderPlot({
-    n_documents_by_year <- head(get_n_documents_by_year(), -1)
-    n_documents_by_year[] <-
-      lapply(n_documents_by_year, as.numeric)
-    df <- n_documents_by_year$ALL
-    evolution <- diff(df)
+    df <- get_n_documents_by_year()
+    df$Freq <- as.numeric(df$Freq)
+    df$PercentageChange <- c(0, diff(df$Freq) / df$Freq[-length(df$Freq)] * 100)
     
-    percentage_evolution <-
-      round((evolution / df[-length(df)]) * 100, 2)
+    ggplot(df, aes(x = Var1, y = Freq)) +
+      geom_line(aes(group = 1), linetype = "dashed", color = "blue") +
+      geom_point(aes(y = Freq), color = "blue", size = 3) +
+      geom_text(aes(label = sprintf("%d (%.2f%%)", Freq, PercentageChange)), hjust = -0.1,vjust = 2,
+                size = 3, color = "red")  +
+      labs(y = "Generated Documents", x = "Year") +
+      theme_minimal()
 
     
-    greater_than_9999 <- df[-length(df)] > 9999
-    df_label <- ifelse(greater_than_9999,
-                       paste(format(df[-length(df)], big.mark = ","), " (", percentage_evolution, "%)", sep = ""),
-                       paste(df[-length(df)], " (", percentage_evolution, "%)", sep = ""))
-    
-
-    n_documents_by_year_evolution <-
-      n_documents_by_year[2:(as.numeric(input$years[2]) - as.numeric(input$years[1]) +
-                               1), ]
-    n_documents_by_year_evolution$labels <- df_label
-    
-    generated_documents_plot = ggplot(data = n_documents_by_year_evolution, aes(x = year, y = ALL, group = 1)) +
-      geom_line(aes(x = year, y = ALL), color = "black") +
-      geom_point(aes(x = year, y = ALL), color = "black") +
-      geom_text(
-        aes(label = labels),
-        hjust = -0.1,
-        vjust = 2,
-        size = 3
-      ) +
-      xlab("Year") +
-      ylab("Generated Documents") +
-      scale_x_continuous(breaks = seq(as.numeric(input$years[1]) + 1, as.numeric(input$years[2]), 1),
-                         expand = c(0.1, 0.9)) +
-      scale_y_continuous(labels = function(x) ifelse(x > 9999, format(x, big.mark = ","), x)) +
-      theme(legend.title = element_blank())
-    
-    ggsave("generated_documents.png", generated_documents_plot, dpi=300) # Decomment to save on a folder a big plot 
-    generated_documents_plot
     
   })
   
@@ -142,7 +67,6 @@ server <- function(input, output) {
     n_years = end_year - start_year + 1
     
     d <- get_top10_data()
-    
     aux_map <- list()
     for (i in 2:ncol(d)) {
       for (f in 1:nrow(d)) {
@@ -218,7 +142,8 @@ server <- function(input, output) {
       papers_all %>%  group_by(year) %>% top_n(3, citations)
     top3_docs <-
       top3_docs %>% filter(between(year, start_year, end_year))
-    top3_docs[order(top3_docs$year, top3_docs$citations), ]
+    df <- top3_docs[order(top3_docs$year, top3_docs$citations), ]
+    df <- df[, -ncol(df)]
   })
   
   

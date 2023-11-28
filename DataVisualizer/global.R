@@ -44,6 +44,7 @@ library(shinydashboard) # Graphic UI
 
 
 
+
 data_folder = "./data/"
 
 search_term <- readLines(paste(data_folder, "term.csv", sep =''))
@@ -101,14 +102,15 @@ topics <- function (text) {
   docs <- tm_map(docs, content_transformer(tolower))
   # Remove numbers
   docs <- tm_map(docs, removeNumbers)
-  # Remove english common stopwords
-  docs <- tm_map(docs, removeWords, stopwords("english"))
-  # Remove concepts that do not add value
-  docs <- tm_map(docs, removeWords, excluded_words[[1]])
+
   # Remove punctuations
   docs <- tm_map(docs, removePunctuation)
   # Remove extra white spaces
   docs <- tm_map(docs, stripWhitespace)
+  # Remove english common stopwords
+  docs <- tm_map(docs, removeWords, stopwords("english"))
+  # Remove concepts that do not add value
+  docs <- tm_map(docs, removeWords, excluded_words[[1]])
   
   
   # Map the concepts of more than one word to one
@@ -119,6 +121,10 @@ topics <- function (text) {
           gsub(x, pattern = concepts_map[i, 1], replacement = concepts_map[i, 2])
       ))
   }
+  
+  # Remove concepts that do not add value Note: It's used again for the case that the concepts_map add them again
+  docs <- tm_map(docs, removeWords, excluded_words[[1]])
+  
   tdm <- TermDocumentMatrix(docs)
   m <- as.matrix(tdm)
   v <- sort(rowSums(m), decreasing = TRUE)

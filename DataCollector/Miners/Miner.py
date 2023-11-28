@@ -1,7 +1,7 @@
 import urllib
-
+from time import sleep
 from DataCollector.InvalidData import InvalidData
-
+import re
 
 class Miner:
     csv_format = "\"{year}\",\"{title}\",\"{citations}\",\"{authors}\",\"{editorial}\""
@@ -12,12 +12,14 @@ class Miner:
         self.start_year = start_year
         self.end_year = end_year
         self.path = path
+        self.safe_term = re.sub(r'[^a-zA-Z0-9_.]', '', self.term)
 
-    def _get_editorial(self):  # Return editorial Name
+    def _get_editorial(self, paper=None):  # Return editorial Name
         raise NotImplementedError
 
     def _get_year_file_name(self, year):
-        return self.path + "/tmp_" + self._get_editorial() + "_" + str(year) + "_data.csv"
+
+        return self.path + "/tmp_" + self._get_editorial() + "_" + str(year) + '_' + self.safe_term + "_data.csv"
 
     def _write_csv_header(self, year):
         with open(self._get_year_file_name(year), "w") as f:
@@ -36,12 +38,15 @@ class Miner:
             year += 1
         print("Total analyzed: " + str(total_analyzed))
 
-    def save_reg(self, year, title, citations, authors):
+    def save_reg(self, year, title, citations, authors, editorial):
         with open(self._get_year_file_name(year), "a") as f:
+            title = title if title is None else title.replace('"', "'")
+            authors = authors if authors is None else authors.replace('"', "'")
+            editorial = editorial if editorial is None else editorial.replace('"', "'")
             f.write(self.csv_format.format(year=year, title=title,
                                            citations=citations,
                                            authors=authors,
-                                           editorial=self._get_editorial()) + "\n")
+                                           editorial=editorial) + "\n")
 
     def year_analysis(self, year):
         year_analyzed = 0
@@ -49,18 +54,27 @@ class Miner:
         print("Start analysis year: " + str(year))
         limit = self._get_limit(year)
         while current < limit:
-            year_analyzed += self.page_analysis(year, current)
             print("Year " + str(year) + ": Progress: " + str(round((current / limit) * 100, 2)) + "%")
+            try:
+                year_analyzed += self.page_analysis(year, current)
+            except Exception as e:
+                print("ERROR ON GET PAGE: {}".format(str(e)))
+                print("WAITING 120s")
+                sleep(120)
+                print("RETRING...")
+                continue
             current += self._get_current_increase()
+            print("Current " + str(current) + " Limit:" + str(limit) + " Year analized:" + str(year_analyzed))
         print("Year " + str(year) + ": Progress: 100%, Analyzed: " + str(year_analyzed))
         return year_analyzed
 
     def page_analysis(self, year, current):  # Analise page documents and return the number of analyzed documents
         analyzed = 0
-        for paper in self._get_list_current_list_of_papers(year, current):
+        papers = self._get_list_current_list_of_papers(year, current)
+        for paper in papers:
             try:
                 title, citations, authors = self.reg_analysis(paper)
-                self.save_reg(year, title, citations, authors)
+                self.save_reg(year, title, citations, authors, self._get_editorial(paper))
             except InvalidData:
                 pass
             analyzed += 1
@@ -86,3 +100,5 @@ class Miner:
 
     def _get_current_increase(self):
         raise NotImplementedError
+
+

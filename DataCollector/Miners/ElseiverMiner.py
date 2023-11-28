@@ -13,12 +13,12 @@ class ElseiverMiner(Miner):
         self.cited_parser = re.compile("Cited by \([0-9]+\)")
         self.token_parser = re.compile("\"searchToken\":\".*\"},\"s")
         self.elsevier_base = "https://www.sciencedirect.com"
-        self.elsevier_search_url = self.elsevier_base + "/search?qs={term}&years={year}&lastSelectedFacet=years"  # Get search token
-        self.elsevier_search_url_api = self.elsevier_base + "/search/api?lastSelectedFacet=years&qs={term}&years={year}&offset={offset}&t={token}"
+        self.elsevier_search_url = self.elsevier_base + "/search?tak={term}&years={year}&lastSelectedFacet=years"  # Get search token
+        self.elsevier_search_url_api = self.elsevier_base + "/search/api?lastSelectedFacet=years&tak={term}&years={year}&offset={offset}&t={token}"
         self.cited_url = self.elsevier_base + "/sdfe/arp/citingArticles?pii={pii}"
         self.token = self._get_token()
 
-    def _get_editorial(self):
+    def _get_editorial(self, paper=None):
         return "ELSEVIER"
 
     def _get_token(self):
@@ -51,7 +51,7 @@ class ElseiverMiner(Miner):
         return o_json["searchResults"]
 
     def _get_content_title(self, paper):
-        return paper["title"].replace("<em>", "").replace("</em>", "").replace('"', "'")
+        return paper["title"].replace("<em>", "").replace("</em>", "")
 
     def _get_content_citations(self, paper):
         pii = paper['pii']
@@ -66,7 +66,6 @@ class ElseiverMiner(Miner):
         authors = ""
         if "authors" in paper:
             authors = ("".join(o["name"] for o in paper["authors"]))[:-2]
-        authors = authors.replace('"', "'")
         if authors == "":
             authors = "No authors available"
         return authors

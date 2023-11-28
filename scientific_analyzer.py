@@ -32,8 +32,8 @@ data_path = "DataVisualizer/data"
 
 parser = argparse.ArgumentParser(description='Collect information on a topic from leading scientific publishers and visualize it ')
 group = parser.add_mutually_exclusive_group()
-group.add_argument('-c', '--collect', nargs=3, metavar=('term', 'start_year', 'end_year'),
-                   type=str, help='Collect term information from start_year to end_year:  scientific_analyzer.py -c "blockchain" 2013 2022')
+group.add_argument('-c', '--collect', nargs='+', metavar=('start_year', 'end_year', 'terms'),
+                   type=str, help='Collect term information from start_year to end_year:  scientific_analyzer.py -c  2013 2022' "blockchain" "blockchain papers")
 group.add_argument('-v', '--visualizer', action='store_true', help='Open a shiny app with the latest data collected')
 group.add_argument('-l', '--load', action='store_true', help='Transfer the data you recently gathered in \'./tmp_data\' to the parser')
 args = parser.parse_args()
@@ -41,11 +41,11 @@ args = parser.parse_args()
 
 
 if args.collect:
-    term = args.collect[0]
-    start_year = int(args.collect[1])
-    end_year = int(args.collect[2])
+    terms = args.collect[2:]
+    start_year = int(args.collect[0])
+    end_year = int(args.collect[1])
     print("Option A chosen with arguments:", args.collect)
-    print("term: {}  \nSyear: {} \nEdata: {}".format(term, start_year, end_year))
+    print("term: {}  \nSyear: {} \nEdata: {}".format(str(terms), start_year, end_year))
 
     # Clean tmp_data
     # Delete all csv files in the destination folder
@@ -55,16 +55,19 @@ if args.collect:
 
     # Save search term on .csv
     with open(tmp_data_path + "/term.csv", "w") as f:
-        f.write(term)
+        for term in terms:
+            f.write(term)
+            break # Use first one as label
 
     # Save search term on .csv
     with open(tmp_data_path + "/time.csv", "w") as f:
-        f.write(datetime.datetime.now().strftime("%Y-%m-%d"))
+        f.write(datetime.datetime.now().strftime("%Y-%m-%d")+"\n")
 
     while start_year <= end_year:
         for MinerClass in miners_list:
-            miner = MinerClass(term, start_year, start_year, tmp_data_path)
-            miner.run()
+            for term in terms:
+                miner = MinerClass(term, start_year, start_year, tmp_data_path)
+                miner.run()
         start_year += 1
 
     print()
@@ -105,6 +108,7 @@ elif args.load:
 
     df_list = []
     for file in all_files:
+        print(file)
         df = pd.read_csv(os.path.join(tmp_data_path, file), dtype={'year': int, 'title': str, 'citations': int, 'authors': str, 'editorial': str})
         df_list.append(df)
     merged_df = pd.concat(df_list)

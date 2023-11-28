@@ -37,22 +37,12 @@ body <- dashboardBody(tabItems(
                 width = NULL,
                 status = "primary",
                 solidHeader = TRUE,
-                title = "Editorials blockchain documents creation",
+                title = "Documents creation",
                 tableOutput("resumeTable"),style="overflow-y: scroll;"
               )
             ),
             column(
-              6,
-              box(
-                width = NULL,
-                status = "primary",
-                solidHeader = TRUE,
-                title = "Editorials collected documents per year",
-                plotOutput("totalByPlataform")
-              )
-            ),
-            column(
-              6,
+              12,
               box(
                 width = NULL,
                 status = "primary",

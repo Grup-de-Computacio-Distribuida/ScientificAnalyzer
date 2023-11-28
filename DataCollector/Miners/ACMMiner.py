@@ -9,10 +9,11 @@ from DataCollector.InvalidData import InvalidData
 class ACMMiner(Miner):
     def __init__(self, term, start_year, end_year, path):
         super().__init__(term, start_year, end_year, path)
+
         self.reg_for_page = 50
         self.acm_base_url = "https://dl.acm.org"
         self.acm_web_url = self.acm_base_url + "/action/doSearch?fillQuickSearch=false&target=advanced&expand=dl&field1=AllField&text1={term}&AfterYear={year}&BeforeYear={year}&startPage={page}&pageSize=" + str(self.reg_for_page)
-    def _get_editorial(self):
+    def _get_editorial(self, paper=None):
         return "ACM"
 
     def _get_request_header(self):
@@ -39,6 +40,7 @@ class ACMMiner(Miner):
 
     def _get_limit(self, year):
         url = self.acm_web_url.format(page=0, term=self.term, year=year)
+        print(url)
         r = requests.get(url, headers=self._get_request_header())
         parse = bs4.BeautifulSoup(r.text, features="html.parser")
         return self._find_acm_pages(parse)
@@ -63,7 +65,7 @@ class ACMMiner(Miner):
         raw_title = raw_title.find("a")
         title = raw_title.findAll(text=True, recursive=True)
         title = "".join(t for t in title)
-        return title if title is None else title.replace('"', "'")
+        return title
 
     def _get_content_citations(self, paper):
         raw_citations = paper.find("span", {"class": "citation"})
@@ -80,5 +82,4 @@ class ACMMiner(Miner):
             for li in raw_authors.find_all("li"):
                 authors += li.find(text=True, recursive=True) + ", "
             authors = authors[:-2]
-        authors = authors if authors is None else authors.replace('"', "'")
         return authors

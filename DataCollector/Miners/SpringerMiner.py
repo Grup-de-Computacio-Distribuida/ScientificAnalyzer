@@ -7,10 +7,12 @@ from DataCollector.Miners.Miner import Miner
 class SpringerMiner(Miner):
     def __init__(self, term, start_year, end_year, path):
         super().__init__(term, start_year, end_year, path)
+        self.term = self.term.replace('%20', '+AND+')
         self.springer_base_url = "https://link.springer.com"
-        self.springer_web_url = self.springer_base_url + "/search/page/{page}?query={term}&date-facet-mode=between&facet-start-year={year}&previous-start-year={year}&facet-end-year={year}&previous-end-year={year}"
+        self.springer_web_url = self.springer_base_url + "/search/page/{page}?query={term}&date-facet-mode=between&facet-start-year={year}&previous-start-year={year}&facet-end-year={year}&previous-end-year={year}&facet-content-type=\"Article\"&showAll=false"
+        #self.springer_web_url = self.springer_base_url + "/search/page/{page}?query=\"Sustainable+development+goals\"+AND+\"Corporate+Social+Responsibility\"&date-facet-mode=between&facet-start-year={year}&previous-start-year={year}&facet-end-year={year}&previous-end-year={year}&facet-content-type=\"Article\"&showAll=false"
 
-    def _get_editorial(self):
+    def _get_editorial(self, paper=None):
         return "SPRINGER"
 
     def _get_request_header(self):
@@ -70,7 +72,7 @@ class SpringerMiner(Miner):
     def _get_content_title(self, paper):
         raw_title = paper.find("a", {"class": "title"})
         title = raw_title.find(text=True, recursive=False)
-        return title if title is None else title.replace('"', "'")
+        return title
 
     def _get_content_citations(self, paper):
         raw_title = paper.find("a", {"class": "title"})
@@ -82,5 +84,4 @@ class SpringerMiner(Miner):
         authors = ""
         if raw_authors:  # It is possible n authors defined
             authors = "".join(author.contents[0] + ", " for author in raw_authors.find_all("a"))[:-2]
-        authors = authors if authors is None else authors.replace('"', "'")
         return authors

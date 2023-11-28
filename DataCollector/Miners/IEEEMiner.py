@@ -13,7 +13,7 @@ class IEEEMiner(Miner):
         self.token = self._get_token()
         self._term_no_filter = term
 
-    def _get_editorial(self):
+    def _get_editorial(self, paper=None):
         return "IEEE"
 
     def _get_request_header(self):
@@ -65,7 +65,7 @@ class IEEEMiner(Miner):
         return []
 
     def _get_content_title(self, paper):
-        return paper["articleTitle"].replace('"', "'")
+        return paper["articleTitle"]
 
     def _get_content_citations(self, paper):
         return paper["citationCount"]
@@ -74,5 +74,4 @@ class IEEEMiner(Miner):
         authors = ""
         if 'authors' in paper:
             authors = "".join(a['preferredName'] + ", " for a in paper['authors'])[:-2]
-        authors = authors.replace('"', "'")
         return authors
