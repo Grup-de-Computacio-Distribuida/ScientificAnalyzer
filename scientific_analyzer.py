@@ -27,7 +27,7 @@ def compress_folder(folder_path, output_path):
 
 tmp_data_path = "./tmp_data"
 backup_data_path = "./backup_data"
-data_path = "DataVisualizer/data"
+data_path = "./DataVisualizer/data"
 
 
 parser = argparse.ArgumentParser(description='Collect information on a topic from leading scientific publishers and visualize it ')
