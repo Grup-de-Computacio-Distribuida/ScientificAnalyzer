@@ -47,7 +47,7 @@ search:
 parse:
 	@echo "Running scientific data parser"
 	mkdir -p "$(BACKUP_DIR)/$(TAG)"
-	docker run --name "$(TAG)-parse" --rm -it \
+	docker run --name "$(TAG)-parse" -d --rm -it \
 				-v "$(DATA_DIR)/$(TAG)":/app/tmp_data \
 				-v "$(BACKUP_DIR)":/app/backup_data \
 				-v "./DataVisualizer/data":/app/DataVisualizer/data \
@@ -67,7 +67,7 @@ visualize:
 		@echo "Running scientific data visualizer"
 		$(eval $(call check_port))
 		@echo "Using port: $(PORT)"
-		docker run --name "$(TAG)-visualize"  --rm -it \
+		docker run --name "$(TAG)-visualize"  -d --rm -it \
 				-v ./DataVisualizer:/srv/shiny-server/DataVisualizer \
 				-p $(PORT):3838 \
 				data_visualizer
