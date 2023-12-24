@@ -39,15 +39,10 @@ TAG ?= ${TIMESTAMP}
 search:
 	@echo "Generating a folder with the timestamp: $(TIMESTAMP)"
 	mkdir -p "$(DATA_DIR)/$(TAG)"
-	mkdir -p "$(DATA_DIR)/$(TAG)/logs"
 	@echo "Running scientific data collector"
-	docker run --name "$(TAG)-search" -d -it \
+	docker run --name "$(TAG)-search" -d -it --rm \
                 -v "$(DATA_DIR)/$(TAG)":/app/tmp_data \
                 data_collector python3 scientific_analyzer.py -c $(INI) $(END) $(TERMS)
-	@echo "Capturing logs..."
-	docker logs -f "$(TAG)-search" > "$(DATA_DIR)/$(TAG)/logs/search.log"
-	@echo "Stopping and removing the container..."
-	docker stop "$(TAG)-search" && docker rm "$(TAG)-search"
 
 parse:
 	@echo "Running scientific data parser"
