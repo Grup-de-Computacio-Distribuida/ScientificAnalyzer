@@ -41,7 +41,7 @@ search:
 	mkdir -p "$(DATA_DIR)/$(TAG)"
 	mkdir -p "$(DATA_DIR)/$(TAG)/logs"
 	@echo "Running scientific data collector"
-	docker run --name "$(TAG)-serach" -d --rm -it \
+	docker run --name "$(TAG)-serach" -d --rm -it -a STDOUT -a STDERR \
                 -v "$(DATA_DIR)/$(TAG)":/app/tmp_data \
                 data_collector python3 scientific_analyzer.py -c $(INI) $(END) $(TERMS) > "$(DATA_DIR)/$(TAG)/logs/$(TIMESTAMP).log"
 
