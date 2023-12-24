@@ -47,10 +47,11 @@ search:
 parse:
 	@echo "Running scientific data parser"
 	mkdir -p "$(BACKUP_DIR)/$(TAG)"
+	mkdir -p "$(DATA_DIR)/$(TAG)/data"
 	docker run --name "$(TAG)-parse" -d --rm -it \
 				-v "$(DATA_DIR)/$(TAG)":/app/tmp_data \
 				-v "$(BACKUP_DIR)":/app/backup_data \
-				-v "./DataVisualizer/data":/app/DataVisualizer/data \
+				-v "$(DATA_DIR)/$(TAG)/data":/app/DataVisualizer/data \
 				data_collector python3 scientific_analyzer.py -l
 
 
@@ -69,6 +70,7 @@ visualize:
 		@echo "Using port: $(PORT)"
 		docker run --name "$(TAG)-visualize"  -d --rm -it \
 				-v ./DataVisualizer:/srv/shiny-server/DataVisualizer \
+				-v $(DATA_DIR)/$(TAG)/data:/srv/shiny-server/DataVisualizer/data \
 				-p $(PORT):3838 \
 				data_visualizer
 

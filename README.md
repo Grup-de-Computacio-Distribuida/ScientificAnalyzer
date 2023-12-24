@@ -54,5 +54,4 @@ where:
 
 - Persist logs after container deletion
 - Notify when job is done
-- The load is putting the data in the wrong place for multiple containers
-  - The data must be stored in other folder and load in visualize
+- The load is putting the data in the wrong place for multiple containers [@DONE]
