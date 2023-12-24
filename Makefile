@@ -41,9 +41,9 @@ search:
 	mkdir -p "$(DATA_DIR)/$(TAG)"
 	mkdir -p "$(DATA_DIR)/$(TAG)/logs"
 	@echo "Running scientific data collector"
-	docker run --name "$(TAG)-serach" -d --rm -it -a STDOUT -a STDERR \
-                -v "$(DATA_DIR)/$(TAG)":/app/tmp_data \
-                data_collector python3 scientific_analyzer.py -c $(INI) $(END) $(TERMS) > "$(DATA_DIR)/$(TAG)/logs/$(TIMESTAMP).log"
+	docker run --name "$(TAG)-serach" -d --rm -it \
+				-v "$(DATA_DIR)/$(TAG)":/app/tmp_data \
+    			data_collector sh -c 'python3 scientific_analyzer.py -c "$(INI)" "$(END)" "$(TERMS)" > "$(DATA_DIR)/$(TAG)/logs/$(TIMESTAMP).log"'
 
 parse:
 	@echo "Running scientific data parser"
@@ -54,6 +54,10 @@ parse:
 				-v "$(BACKUP_DIR)":/app/backup_data \
 				-v "$(DATA_DIR)/$(TAG)/data":/app/DataVisualizer/data \
 				data_collector python3 scientific_analyzer.py -l
+
+docker run --name "-serach" -d --rm -it \
+-v "/root/data/":/app/tmp_data \
+data_collector python3 'scientific_analyzer.py -c 2020 2023 "multi-armed bandit" "simulator" "edge" "mobile edge computing" > "/root/data/logs/1703400957.log"'
 
 
 PORT := 3838
