@@ -52,6 +52,6 @@ where:
 
 ## TODO
 
-- Persist logs after container deletion [@DONE]
+- Persist logs after container deletion 
 - Notify when job is done
 - The load is putting the data in the wrong place for multiple containers [@DONE]
