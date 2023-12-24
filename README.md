@@ -54,7 +54,5 @@ where:
 
 - Persist logs after container deletion
 - Notify when job is done
-- Update repo automatically [@DONE]
-  - Cron job to check for updates
-  - Update repo (git pull)
-  - Rebuild images
+- The load is putting the data in the wrong place for multiple containers
+  - The data must be stored in other folder and load in visualize
