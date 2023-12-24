@@ -8,12 +8,6 @@ import datetime
 import pandas as pd
 from DataCollector.Miners import miners_list
 
-import sys
-
-log_file_path = "./tmp_data/log.txt"
-sys.stdout = open(log_file_path, "w")
-
-
 def compress_folder(folder_path, output_path):
     """Compresses all the files in a folder into a zip archive"""
     # Create a ZipFile object
