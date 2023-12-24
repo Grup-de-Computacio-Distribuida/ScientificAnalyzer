@@ -32,7 +32,7 @@ clean-data-visualizer:
 # Run docker containers to search and visualize data
 
 DATA_DIR ?= /root/data
-BACKUP_DIR ?= /root/backup
+BACKUP_DIR ?= /root/data/backup
 TIMESTAMP := $(shell date +%s)
 TAG ?= ${TIMESTAMP}
 
@@ -72,5 +72,9 @@ visualize:
 				-p $(PORT):3838 \
 				data_visualizer
 
-
+# Create a cron job to run update.sh every sunday at 00:00
+install-cron:
+	@echo "Installing cron job"
+	@echo "0 0 * * 0 cd $(PWD) && /bin/bash ./update.sh >> $(PWD)/cron.log 2>&1" | crontab -
+	@echo "Cron job installed. Log will be written to $(PWD)/cron.log"
 
