@@ -42,7 +42,7 @@ search:
 	@echo "Running scientific data collector"
 	docker run --name "$(TAG)-search" -d -it --rm \
                 -v "$(DATA_DIR)/$(TAG)":/app/tmp_data \
-                data_collector python3 scientific_analyzer.py -c $(INI) $(END) $(TERMS)
+                data_collector sh -c "python3 -u scientific_analyzer.py -c $(INI) $(END) $(TERMS) | tee /app/tmp_data/search.log"
 
 parse:
 	@echo "Running scientific data parser"
