@@ -1,4 +1,4 @@
-REPO=https://github.com/Grup-de-Computacio-Distribuida/ScientificAnalyzer.git
+REPO=https://github.com/dcg-udl-cat/ScientificAnalyzer.git
 
 git pull $REPO
 
